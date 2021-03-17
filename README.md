@@ -24,7 +24,7 @@ const MODE = 'mutiple'
 ```
 [To find your Plex token...](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
 
-## Images buil mode
+## Images build mode
 There is 2 mode for export
 - One long image with every items in it (size: 2200xXXXX)
 - Multiple images depending of how many items you got (size: 2200x3310)
