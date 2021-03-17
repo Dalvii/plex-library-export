@@ -2,9 +2,6 @@
 Export Plex libraries at image format for a better preview of what you have on your Plex.
 Items will be set in 7x7 format.
 
-<img src="https://github.com/Dalvii/plex-library-export/blob/main/exemple_Animes_full.jpg?raw=true" width="70%"></img>
-<img src="https://github.com/Dalvii/plex-library-export/blob/main/exemple_movies.jpg?raw=true" width="70%"></img>
-
 ## Node install
 You need Node.js to run this script: [Download](https://nodejs.org/en/download/)
 Then download the repo,
@@ -34,3 +31,9 @@ There is 2 mode for export
 
 ## Background
 You can change the background of the image by naming it `bg.png`
+
+## Exemple
+
+<img src="https://github.com/Dalvii/plex-library-export/blob/main/exemple_Animes_full.jpg?raw=true" width="70%"></img>
+
+<img src="https://github.com/Dalvii/plex-library-export/blob/main/exemple_movies.jpg?raw=true" width="70%"></img>
