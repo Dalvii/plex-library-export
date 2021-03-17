@@ -32,6 +32,9 @@ There is 2 mode for export
 ## Background
 You can change the background of the image by naming it `bg.png`
 
+## Infos
+- Discord : `Dalvi#3682`
+
 ## Exemple
 
 <img src="https://github.com/Dalvii/plex-library-export/blob/main/exemple_Animes_full.jpg?raw=true" width="70%"></img>
