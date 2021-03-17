@@ -11,10 +11,15 @@ $ npm init
 ```
 Then install dependencies:
 ```
-$ npm i word-wrap && npm i node-fetch && npm i fs && npm i xml-js && npm i canvas
+$ npm i word-wrap node-fetch fs xml-js canvas
 ```
 
-##  Configuration
+## Run
+```
+$ node ./main.js
+```
+
+## Configuration
 You need to modify the script to match your plex.
 ```
 const PLEX_API = '?X-Plex-Token=YOUR_PLEX_TOKEN'
