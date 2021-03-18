@@ -25,6 +25,13 @@ const getURL = (type) => {
 
 const truncate = (str, n) => (str.length > n) ? str.substr(0, n - 1) + '...' : str;
 
+const handleError = (err) => {
+    if (`${err}`.includes('ECONNREFUSED')) {
+        console.log('[Error] Unable to connect to the Plex server. Please ensure PLEX_URL on line 13 is correct');
+    } else console.log(`[Error] ${err}`);
+    process.exit(0);
+}
+
 async function get() {
     // Ensure MODE is valid
     if (!['unique', 'multiple'].includes(MODE)) {
@@ -34,13 +41,13 @@ async function get() {
 
     // Ensure PLEX_TOKEN is set
     if (PLEX_TOKEN === '') {
-        console.log('[Error] PLEX_TOKEN is not set on line 11');
+        console.log('[Error] PLEX_TOKEN is not set on line 12');
         process.exit(0);
     }
 
     // If a library key is not set, print out the available keys
     if (Number(SECTION) === 0) {
-        const xml = await fetch(getURL('sections'), { method: 'GET' }).then(res => res.text()).catch(console.error);
+        const xml = await fetch(getURL('sections'), { method: 'GET' }).then(res => res.text()).catch(handleError);
         const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
         console.log('[Error] SECTION needs to be assigned a library key on line 14');
         json.MediaContainer.Directory.map(item => {
@@ -51,7 +58,7 @@ async function get() {
     }
 
     // Fetch the contents of the library and convert XML to JSON
-    const xml = await fetch(getURL('main'), { method: 'GET' }).then(response => response.text()).catch(console.error);
+    const xml = await fetch(getURL('all'), { method: 'GET' }).then(response => response.text()).catch(handleError);
     const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
     const content = json.MediaContainer.Directory == undefined ? json.MediaContainer.Video : json.MediaContainer.Directory;
     const library = json.MediaContainer._attributes.librarySectionTitle;
@@ -64,9 +71,9 @@ async function get() {
         title_list.push(truncate(i._attributes.title, 31));
     });
 
-    console.log(library)
-    console.log('Script by Dalvi https://github.com/Dalvii/')
-    console.log('There are ' + title_list.length + ' elements total')
+    console.log(`[Info] Exporting Library: ${library}`)
+    console.log('[Info] Script by Dalvi https://github.com/Dalvii/')
+    console.log('[Info] There are ' + title_list.length + ' elements total')
 
     let y_total = Math.ceil(poster_list.length / 7) * 430 + 300
     let x_pos = [150, 428.3, 706.6, 984.9, 1263.2, 1541.5, 2200 - 150 - 230]
@@ -76,7 +83,7 @@ async function get() {
 
     for (let y = 0; y < pages; y++) {
 
-        console.log('page ' + (y + 1) + ' with ' + (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49)) + ' images...')
+        console.log('[Info] Page ' + (y + 1) + ' with ' + (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49)) + ' images...')
 
         const canvas = Canvas.createCanvas(2200, (MODE === 'unique' ? y_total : 3310));
         const ctx = canvas.getContext('2d');
@@ -107,7 +114,9 @@ async function get() {
         const stream = canvas.createJPEGStream();
 
         stream.pipe(out);
-        out.on('finish', () => { console.log('Completed!') });
+        out.on('finish', () => {
+            console.log('[Info] Completed! You will find the images in the "output" directory');
+        });
     }
 }
 
