@@ -108,7 +108,7 @@ async function get() {
 
         // Build image
         canvas.toBuffer();
-        fs.mkdirSync(__dirname + '/output');
+        if (!fs.existsSync(__dirname + 'output/')) fs.mkdirSync(__dirname + '/output');
 
         const out = fs.createWriteStream(__dirname + '/output/' + library + '_' + y + '.jpg');
         const stream = canvas.createJPEGStream();
