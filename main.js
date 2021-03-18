@@ -2,6 +2,7 @@
 const wrap = require('word-wrap');
 const fetch = require('node-fetch');
 const fs = require('fs');
+const path = require('path');
 const convert = require('xml-js');
 const Canvas = require('canvas');
 const { registerFont } = require('canvas');
@@ -13,6 +14,7 @@ const PLEX_TOKEN = '';
 const PLEX_URL = 'http://localhost:32400';
 const SECTION = '0';
 const MODE = 'unique'; // 'unique' or 'mutiple' for 1 single image or several for each page 
+const OUTPUT_DIR = path.join(__dirname, 'output');
 
 const getURL = (type) => {
     switch (type) {
@@ -108,7 +110,9 @@ async function get() {
 
         // Build image
         canvas.toBuffer();
-        if (!fs.existsSync(__dirname + 'output/')) fs.mkdirSync(__dirname + '/output');
+        if (!fs.existsSync(OUTPUT_DIR)) {
+            fs.mkdirSync(OUTPUT_DIR);
+        }
 
         const out = fs.createWriteStream(__dirname + '/output/' + library + '_' + y + '.jpg');
         const stream = canvas.createJPEGStream();
