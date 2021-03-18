@@ -2,6 +2,8 @@
 Export Plex libraries at image format for a better preview of what you have on your Plex.
 Items will be set in 7x7 format.
 
+` CAUTION: (unique mode only) BIG LIBRAIRIES WITH MORE THAN 525 ITEMS WILL NOT WORK DUE OF A LIMITATION OF PNG IMAGE, I'M WORKING ON A FIX THAT WILL ARRIVE SOON !! (sorry for that)`
+
 ## Node install
 You need Node.js to run this script: [Download](https://nodejs.org/en/download/)
 Then download the repo,
