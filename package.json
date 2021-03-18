@@ -1,0 +1,33 @@
+{
+  "name": "plex-library-export",
+  "version": "1.0.0",
+  "description": "Export Plex libraries at image format for a better preview of what you have on your Plex.\r Items will be set in 7x7 format.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dalvii/plex-library-export.git"
+  },
+  "keywords": [
+    "plex",
+    "export",
+    "libraries",
+    "image",
+    "canvas"
+  ],
+  "author": "https://github.com/Dalvii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dalvii/plex-library-export/issues"
+  },
+  "homepage": "https://github.com/Dalvii/plex-library-export#readme",
+  "dependencies": {
+    "canvas": "^2.7.0",
+    "fs": "0.0.1-security",
+    "node-fetch": "^2.6.1",
+    "word-wrap": "^1.2.3",
+    "xml-js": "^1.6.11"
+  }
+}
