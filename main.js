@@ -29,7 +29,7 @@ const truncate = (str, n) => (str.length > n) ? str.substr(0, n - 1) + '...' : s
 
 const handleError = (err) => {
     if (`${err}`.includes('ECONNREFUSED')) {
-        console.log('[Error] Unable to connect to the Plex server. Please ensure PLEX_URL on line 13 is correct');
+        console.log('[Error] Unable to connect to the Plex server. Please ensure PLEX_URL on line 14 is correct');
     } else console.log(`[Error] ${err}`);
     process.exit(0);
 }
@@ -43,7 +43,7 @@ async function get() {
 
     // Ensure PLEX_TOKEN is set
     if (PLEX_TOKEN === '') {
-        console.log('[Error] PLEX_TOKEN is not set on line 12');
+        console.log('[Error] PLEX_TOKEN is not set on line 13');
         process.exit(0);
     }
 
@@ -51,7 +51,7 @@ async function get() {
     if (Number(SECTION) === 0) {
         const xml = await fetch(getURL('sections'), { method: 'GET' }).then(res => res.text()).catch(handleError);
         const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
-        console.log('[Error] SECTION needs to be assigned a library key on line 14');
+        console.log('[Error] SECTION needs to be assigned a library key on line 15');
         json.MediaContainer.Directory.map(item => {
             const library = item._attributes;
             console.log(`${library.key} = ${library.title} (${library.type})`)
