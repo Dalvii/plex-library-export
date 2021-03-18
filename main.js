@@ -13,7 +13,7 @@ registerFont('assets/bahnschrift.ttf', { family: 'Bahnschrift' });
 const PLEX_TOKEN = '';
 const PLEX_URL = 'http://localhost:32400';
 const SECTION = '0';
-const MODE = 'unique'; // 'unique' or 'mutiple' for 1 single image or several for each page 
+const MODE = 'unique'; // 'unique' or 'multiple' for 1 single image or several for each page 
 const OUTPUT_DIR = path.join(__dirname, 'output');
 
 const getURL = (type) => {
