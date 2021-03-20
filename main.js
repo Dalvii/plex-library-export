@@ -1,4 +1,5 @@
 // https://github.com/Dalvii/plex-library-export
+// Thanks to DrKain for his help
 const wrap = require('word-wrap');
 const fetch = require('node-fetch');
 const fs = require('fs');
@@ -6,14 +7,15 @@ const path = require('path');
 const convert = require('xml-js');
 const Canvas = require('canvas');
 const { registerFont } = require('canvas');
+require('dotenv').config()
 
-registerFont('assets/bahnschrift.ttf', { family: 'Bahnschrift' });
+registerFont('assets/bahnschrift.ttf', { family: 'Bahnschrift' }); // Load font
 
 // GET PLEX TOKEN: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
-const PLEX_TOKEN = '';
-const PLEX_URL = 'http://localhost:32400';
-const SECTION = '0';
-const MODE = 'unique'; // 'unique' or 'multiple' for 1 single image or several for each page 
+const PLEX_TOKEN = process.env.PLEX_TOKEN;
+const PLEX_URL = process.env.PLEX_URL
+const SECTION = process.env.SECTION;
+const MODE = process.env.MODE; // 'unique' or 'multiple' for 1 single image or several for each page 
 const OUTPUT_DIR = path.join(__dirname, 'output');
 
 const getURL = (type) => {
@@ -48,7 +50,7 @@ async function get() {
     }
 
     // If a library key is not set, print out the available keys
-    if (Number(SECTION) === 0) {
+    if (Number(SECTION) == 0) {
         const xml = await fetch(getURL('sections'), { method: 'GET' }).then(res => res.text()).catch(handleError);
         const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
         console.log('[Error] SECTION needs to be assigned a library key on line 15');
@@ -73,19 +75,20 @@ async function get() {
         title_list.push(truncate(i._attributes.title, 31));
     });
 
-    console.log(`[Info] Exporting Library: ${library}`)
+    console.log(`[Info] Exporting Library: ${library}, this will take few time...`)
     console.log('[Info] Script by Dalvi https://github.com/Dalvii/')
     console.log('[Info] There are ' + title_list.length + ' elements total')
 
-    let y_total = Math.ceil(poster_list.length / 7) * 430 + 300
+    let y_total = Math.min((Math.ceil(poster_list.length/7) * 430 + 300), 32400)
     let x_pos = [150, 428.3, 706.6, 984.9, 1263.2, 1541.5, 2200 - 150 - 230]
     let y_pos = -280
 
-    let pages = (MODE === 'unique' ? 1 : Math.ceil(poster_list.length / 7 / 7))
+    let big_image = poster_list.length > 525
+    let pages = MODE === 'unique' ? (big_image == true ? Math.ceil(poster_list.length / 525) : 1 ) : Math.ceil(poster_list.length / 7 / 7)
 
     for (let y = 0; y < pages; y++) {
 
-        console.log('[Info] Page ' + (y + 1) + ' with ' + (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49)) + ' images...')
+        console.log('[Info] Page ' + (y + 1) + ' with ' + (MODE === 'unique' ? Math.min(poster_list.length, 525) : Math.min(poster_list.length, 49)) + ' images...')
 
         const canvas = Canvas.createCanvas(2200, (MODE === 'unique' ? y_total : 3310));
         const ctx = canvas.getContext('2d');
@@ -96,7 +99,7 @@ async function get() {
         const bg = await Canvas.loadImage('./assets/background.png');
         ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
-        for (let i = 0; i < (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49)); i++) {
+        for (let i = 0; i < Math.min(525, (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49))); i++) {
             if (i % 7 == 0) y_pos += 430;
             const poster = await Canvas.loadImage(poster_list[i]);
             ctx.drawImage(poster, x_pos[i % 7], y_pos, 230, 340);
@@ -105,8 +108,16 @@ async function get() {
 
         // Reset + Deletes the first 49 elements for multiple mode 
         y_pos = -280;
-        poster_list.splice(0, 49);
-        title_list.splice(0, 49);
+        if (MODE === 'multiple') {
+            poster_list.splice(0, 49)
+            title_list.splice(0, 49)
+        }
+
+        // If "unique" mode is set, and the image is taller than 32400 pixels
+        if (big_image == true && MODE === 'unique') {
+            poster_list.splice(0, 525)
+            title_list.splice(0, 525)
+        }
 
         // Build image
         canvas.toBuffer();
