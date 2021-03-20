@@ -2,7 +2,7 @@
 Export Plex libraries at image format for a better preview of what you have on your Plex.
 Items will be set in 7x7 format.
 
-***CAUTION: (unique mode only) Unique image are limited by 320400 pixel long (about 525 items), so the script will still divide them***
+***CAUTION: (unique mode only) Unique image are limited by 32400 pixel long (about 525 items), so the script will still divide them***
 
 ## Node install
 You need Node.js to run this script: [Download](https://nodejs.org/en/download/)
