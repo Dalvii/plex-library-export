@@ -22,11 +22,12 @@ node main.js
 ## Configuration
 You need to modify the script to match your plex.  
 If you do now know the library `SECTION` ID then run the script. The console will print the IDs for each library.
+Configuration is in `.env` file
 ```
-const PLEX_TOKEN = '';
-const PLEX_URL = 'http://localhost:32400';
-const SECTION = '0';
-const MODE = 'unique'; // unique or multiple
+PLEX_TOKEN=Your-Plex-Token
+PLEX_URL=http://localhost:32400
+SECTION=0
+MODE=unique
 ```
 [To find your Plex token...](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
 
@@ -40,6 +41,7 @@ You can change the background of the image by naming it `background.png`
 
 ## Infos
 - Discord : `Dalvi#3682`
+- Thanks to DrKain
 
 ## Example Anime
 ![Example Anime](https://i.imgur.com/zFthiLW.jpg)
