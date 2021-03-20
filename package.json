@@ -25,6 +25,7 @@
   "homepage": "https://github.com/Dalvii/plex-library-export#readme",
   "dependencies": {
     "canvas": "^2.7.0",
+    "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "node-fetch": "^2.6.1",
     "word-wrap": "^1.2.3",
