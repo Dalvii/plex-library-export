@@ -16,13 +16,27 @@ const PLEX_TOKEN = process.env.PLEX_TOKEN;
 const PLEX_URL = process.env.PLEX_URL
 const SECTION = process.env.SECTION;
 const MODE = process.env.MODE; // 'unique' or 'multiple' for 1 single image or several for each page 
+const UNIQUE_MIN_POSTERS_PER_ROW = process.env.UNIQUE_MIN_POSTERS_PER_ROW ?? 7;
 const OUTPUT_DIR = path.join(__dirname, 'output');
+
+process.on('SIGINT', () => {
+    console.info("Exit");
+    process.exit(0);
+});
+
+const pageMargin = 100;
+const posterWidth = 230;
+const posterHeight = 340;
+const posterRightMargin = 30;
+const posterBottomMargin = 90;
+const totalPosterWidth = posterWidth + posterRightMargin;
+const totalPosterHeight = posterHeight + posterBottomMargin;
 
 const getURL = (type) => {
     switch (type) {
-        case 'all':
+        case 'section':
             return `${PLEX_URL}/library/sections/${SECTION}/all?X-Plex-Token=${PLEX_TOKEN}`;
-        case 'sections':
+        case 'all':
             return `${PLEX_URL}/library/sections/all?X-Plex-Token=${PLEX_TOKEN}`;
     }
 }
@@ -35,6 +49,25 @@ const handleError = (err) => {
     } else console.log(`[Error] ${err}`);
     process.exit(0);
 }
+
+const calculateUniqueCanvasSize = (titleCount) => {
+    let postersPerRow = UNIQUE_MIN_POSTERS_PER_ROW - 1;
+    let x_total;
+    let y_total = 99999; // to run at least once
+
+    // canvas limit
+    while (y_total > 32768) {
+        postersPerRow += 1;
+        x_total = postersPerRow * totalPosterWidth + 2 * pageMargin - posterRightMargin;
+        y_total = Math.ceil(titleCount / postersPerRow) * totalPosterHeight + pageMargin;
+    }
+
+    return {
+        x_total,
+        y_total,
+        postersPerRow,
+    };
+};
 
 async function get() {
     // Ensure MODE is valid
@@ -51,7 +84,10 @@ async function get() {
 
     // If a library key is not set, print out the available keys
     if (Number(SECTION) == 0) {
-        const xml = await fetch(getURL('sections'), { method: 'GET' }).then(res => res.text()).catch(handleError);
+        const xml = await fetch(getURL('all'), { method: 'GET' })
+            .then(res => res.text())
+            .catch(handleError);
+
         const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
         console.log('[Error] SECTION needs to be assigned a library key on line 15');
         json.MediaContainer.Directory.map(item => {
@@ -62,7 +98,10 @@ async function get() {
     }
 
     // Fetch the contents of the library and convert XML to JSON
-    const xml = await fetch(getURL('all'), { method: 'GET' }).then(response => response.text()).catch(handleError);
+    const xml = await fetch(getURL('section'), { method: 'GET' })
+        .then(response => response.text())
+        .catch(handleError);
+
     const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
     const content = json.MediaContainer.Directory == undefined ? json.MediaContainer.Video : json.MediaContainer.Directory;
     const library = json.MediaContainer._attributes.librarySectionTitle;
@@ -77,20 +116,35 @@ async function get() {
 
     console.log(`[Info] Exporting Library: ${library}, this will take few time...`)
     console.log('[Info] Script by Dalvi https://github.com/Dalvii/')
-    console.log('[Info] There are ' + title_list.length + ' elements total')
+    console.log(`[Info] There are ${title_list.length} elements total`)
 
-    let y_total = Math.min((Math.ceil(poster_list.length/7) * 430 + 300), 32400)
-    let x_pos = [150, 428.3, 706.6, 984.9, 1263.2, 1541.5, 2200 - 150 - 230]
-    let y_pos = -280
+    let x_total, y_total, postersPerRow;
 
-    let big_image = poster_list.length > 525
-    let pages = MODE === 'unique' ? (big_image == true ? Math.ceil(poster_list.length / 525) : 1 ) : Math.ceil(poster_list.length / 7 / 7)
+    if (MODE === 'unique') {
+        const sizes = calculateUniqueCanvasSize(title_list.length);
+        x_total = sizes.x_total;
+        y_total = sizes.y_total;
+        postersPerRow = sizes.postersPerRow;
+    }
 
-    for (let y = 0; y < pages; y++) {
+    if (MODE === 'multiple') {
+        postersPerRow = 7;
+        x_total = totalPosterWidth * postersPerRow - posterRightMargin + 2 * pageMargin;
+        y_total = totalPosterHeight * (49 / postersPerRow) + pageMargin;
+    }
 
-        console.log('[Info] Page ' + (y + 1) + ' with ' + (MODE === 'unique' ? Math.min(poster_list.length, 525) : Math.min(poster_list.length, 49)) + ' images...')
+    let x_pos = [pageMargin];
+    for (let i = 0; i < postersPerRow - 1; i += 1) {
+        x_pos.push(x_pos[i] + totalPosterWidth);
+    }
 
-        const canvas = Canvas.createCanvas(2200, (MODE === 'unique' ? y_total : 3310));
+    let pages = MODE === 'unique' ? 1 : Math.ceil(poster_list.length / postersPerRow / postersPerRow);
+
+    for (let y = 0; y < pages; y += 1) {
+        const posterCount = MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49);
+        console.log(`[Info] Page ${y + 1} with ${posterCount} images...`)
+
+        const canvas = Canvas.createCanvas(x_total, y_total);
         const ctx = canvas.getContext('2d');
         ctx.font = 'bold 23px "Bahnschrift"';
         ctx.fillStyle = '#ffffff';
@@ -99,24 +153,18 @@ async function get() {
         const bg = await Canvas.loadImage('./assets/background.png');
         ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
-        for (let i = 0; i < Math.min(525, (MODE === 'unique' ? poster_list.length : Math.min(poster_list.length, 49))); i++) {
-            if (i % 7 == 0) y_pos += 430;
+        for (let i = 0; i < posterCount; i += 1) {
+            const y_pos = Math.floor(i / postersPerRow) * totalPosterHeight + pageMargin;
+
             const poster = await Canvas.loadImage(poster_list[i]);
-            ctx.drawImage(poster, x_pos[i % 7], y_pos, 230, 340);
-            ctx.fillText(wrap(title_list[i], { width: 21 }), x_pos[i % 7] - 5, y_pos + 368);
+            ctx.drawImage(poster, x_pos[i % postersPerRow], y_pos, posterWidth, posterHeight);
+            ctx.fillText(wrap(title_list[i], { width: 21 }), x_pos[i % postersPerRow] - 5, y_pos + posterHeight + 28);
         }
 
-        // Reset + Deletes the first 49 elements for multiple mode 
-        y_pos = -280;
+        // Deletes the first 49 elements for multiple mode 
         if (MODE === 'multiple') {
             poster_list.splice(0, 49)
             title_list.splice(0, 49)
-        }
-
-        // If "unique" mode is set, and the image is taller than 32400 pixels
-        if (big_image == true && MODE === 'unique') {
-            poster_list.splice(0, 525)
-            title_list.splice(0, 525)
         }
 
         // Build image
@@ -125,7 +173,7 @@ async function get() {
             fs.mkdirSync(OUTPUT_DIR);
         }
 
-        const out = fs.createWriteStream(__dirname + '/output/' + library + '_' + y + '.jpg');
+        const out = fs.createWriteStream(`${__dirname}/output/${library}_${y}.jpg`);
         const stream = canvas.createJPEGStream();
 
         stream.pipe(out);

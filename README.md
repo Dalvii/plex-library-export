@@ -19,6 +19,11 @@ npm run start
 node main.js
 ```
 
+## Run using Docker
+```
+./run
+```
+
 ## Configuration
 You need to modify the script to match your plex.  
 If you do now know the library `SECTION` ID then run the script. The console will print the IDs for each library.
@@ -28,6 +33,7 @@ PLEX_TOKEN=Your-Plex-Token
 PLEX_URL=http://localhost:32400
 SECTION=0
 MODE=unique
+UNIQUE_MIN_POSTERS_PER_ROW=10 # optional
 ```
 [To find your Plex token...](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
 
