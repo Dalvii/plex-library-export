@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+build() {
+  docker build -t plex-library-export .
+}
+
+generate() {
+  mkdir -p output
+  docker run --env-file .env --mount type=bind,src=$(pwd)/output,dst=/output plex-library-export
+}
+
+build
+generate
