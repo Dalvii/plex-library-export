@@ -19,6 +19,11 @@ const MODE = process.env.MODE; // 'unique' or 'multiple' for 1 single image or s
 const UNIQUE_MIN_POSTERS_PER_ROW = process.env.UNIQUE_MIN_POSTERS_PER_ROW ?? 7;
 const OUTPUT_DIR = path.join(__dirname, 'output');
 
+if(PLEX_TOKEN === 'Your-Plex-Token') {
+    console.log('[Info] Please set your PLEX_TOKEN in .env');
+    process.exit(0);
+}
+
 process.on('SIGINT', () => {
     console.info("Exit");
     process.exit(0);
@@ -103,6 +108,12 @@ async function get() {
         .catch(handleError);
 
     const json = JSON.parse(convert.xml2json(xml, { compact: true, spaces: 4 }));
+    
+    if(!json.MediaContainer) {
+        console.log('[Info] Invalid or incorrect token.');
+        process.exit(0);
+    }
+    
     const content = json.MediaContainer.Directory == undefined ? json.MediaContainer.Video : json.MediaContainer.Directory;
     const library = json.MediaContainer._attributes.librarySectionTitle;
 
